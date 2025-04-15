@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: application-vs        # this needs to be a unique name for Istio
+  namespace: application-namespace
+spec:
+  gateways: # there are 3 possible gateways, i have the public one uncommented the other two are more restricted
+    - istio-system/public-gateway
+    #- istio-system/private-gateway for harvard network and all harvard vpn
+    #- istio-system/server-gateway super locked down, OIS and server networks
+    #- istio-system/api-private-gateway OIS and apigee
+    # the mesh network is what allows container across namespaces to speak. for example, curiosity talks to mps-embed but doesnt need to go OUT and then in
+    - mesh
+  hosts:
+    - yoursite.lib.harvard.edu
+  http:
+    - match:
+        - uri:
+            prefix /api               # prefix for the application
+#      rewrite:                       # rewrite example, if required
+#        uri: "/"
+      route:
+        - destination:
+            host: application-service # service name which will tie in with service.yaml
+            port:
+            # IF YOU USE THE NGINX PROXY THIS IS 8081/NGINX PROXY PORT
+              number: 12881

@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+
+patches:
+- path: config.yaml
+- path: version.yaml
+
+# here is where we import the js env file we want in our deploy
+configMapGenerator:
+  - name: application-config-cm
+    files:
+      - application-env.js
+  - name: nginx-config-cm
+    files:
+      - nginx-proxy-template.conf
+# this is necessary because of a kustomize bug
+generatorOptions:
+  disableNameSuffixHash: true

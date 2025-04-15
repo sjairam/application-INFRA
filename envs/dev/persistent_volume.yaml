@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: <<application>>-pv
+    namespace: <<application-namespace>>
+    annotations:
+        pv.kubernetes.io/provisioned-by: nfs.csi.k8s.io
+spec:
+    storageClassName: <<application>>-storage           #This is the SC name
+    capacity:
+        storage: 10Gi
+    volumeMode: Filesystem
+    accessModes:
+        - ReadWriteMany
+    persistentVolumeReclaimPolicy: Retain
+    mountOptions:
+#        - async
+#        - hard
+#        - nolock
+        - nfsvers=4.1
+    csi:
+        driver: nfs.csi.k8s.io
+        readOnly: false
+        volumeHandle: <<application>>-vol
+        volumeAttributes:
+            server: fs-0afca58a6112bf240.efs.us-east-1.amazonaws.com   #This is whatever EFS mount that is created
+            share: /<<application>>/assets

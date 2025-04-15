@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application
+  namespace: application-namespace
+spec:
+  template:
+    spec:
+      containers:
+      - name: cachemgr
+        image: artifactory.huit.harvard.edu/lts/nrscachemanager:v1.1.5

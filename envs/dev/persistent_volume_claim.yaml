@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+    name: <<application>>-pvc                       #This is the unique PVC name
+    namespace: <<application-namespace>>
+spec:
+    accessModes:
+        - ReadWriteMany
+    resources:
+        requests:
+            storage: 1Gi
+    volumeName: <<application>>-pv
+    storageClassName: <<application>>-storage       #This needs to tie in with line 9 in the PV
