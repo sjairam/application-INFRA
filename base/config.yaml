@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application-config-file
+  namespace: application-namespace
+data:
+  APP_PORT: "3000"      #application docker port
+  LOGLEVEL: info        #log level
+  REDIS_PORT: "6379"
+  REDIS_SSL: "true"
+  REDIS_CLUSTER: "true"

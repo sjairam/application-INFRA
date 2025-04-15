@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: application-service     #This name needs to be unique and IS THE NAME FOR IN-NETWORK CALLS
+  namespace: application-namespace
+spec:
+  type: ClusterIP         #4 type of ClusterIP/NodePort/Headless & LoadBalancer
+  selector:
+    app: application      #UPDATE this needs to tie to the app that is running in your deploy
+  ports:
+    - name: application
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+    - name: application-proxy
+      protocol: TCP
+      port: 8081
+      targetPort: 8081

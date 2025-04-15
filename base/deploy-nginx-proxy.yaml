@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application
+  namespace: application-namespace
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: application
+  template:
+    metadata:
+      labels:
+        app: application
+    spec:
+      containers:
+      - name: application
+        image: update image in versions file
+        securityContext:
+          runAsUser: 55008          # please change your userid here
+        ports:
+        - containerPort: 3000       # THIS is the port you fill in for nginx to listen to
+        resources:
+          limits:
+            cpu: "1"
+            memory: "2G"
+          requests:
+            cpu: "1"
+            memory: "2G"
+        env:
+        - name: A_PASSWORD          # these are env variables which are used by the app
+          valueFrom:
+            secretKeyRef:
+              name: secrets-application   # this should have a reference to the secrets.yaml
+              key: A_PASSWORD
+        envFrom:
+        - configMapRef:
+             name: application-config-file    # This is the configmaps reference
+        volumeMounts:
+        #example of a subpath corresponding to a pvc
+        - name: data-volume
+          subPath: folder-name
+          mountPath: /path/in/container
+        # this is a config mount using the config file as config map method, this and the volumes section are required with more in the envs locations
+        - name: applicaton-config-file
+          mountPath: /home/node/application-env.js
+          subPath: application-env.js
+        # healthchecks, k8s offers a liveliness and a readiness, in a lotof cases it will be the same thing
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 3000
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+          periodSeconds: 60
+          failureThreshold: 2
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 3000
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+          periodSeconds: 60
+          failureThreshold: 2
+#THIS is the proxy container
+      - name: application-proxy
+        image: nginxinc/nginx-unprivileged:latest
+        imagePullPolicy: Always
+        securityContext:
+          runAsUser: 101
+        ports:
+        - containerPort: 8081
+        resources: 
+          limits:
+            cpu: "1"
+            memory: "1G"
+        - name: nginx-config-file
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: application-proxy.conf   
+      volumes:
+      - name: application-config-file
+        configMap:
+          name: application-config-cm
+      - name: nginx-config-file
+        configMap:
+          name: nginx-config-cm
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: application-pvc-volume

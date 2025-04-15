@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: application-cron
+  namespace: application-namespace
+spec:
+  schedule: "20 14 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 120
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          containers:
+          - name: application-container-name
+            image: <<YOUR IMAGE HERE>>
+            securityContext:
+              runAsUser: <<YOUR USER HERE>>
+            imagePullPolicy: Always
+            # optional if you need container envs like ruby apps do
+            env:
+            - name: SECRET1
+              valueFrom:
+                secretKeyRef: # we make both these names up
+                  name: secrets-applicationy # name in namespace
+                  key: application-secret-1 # make this more descriptive
+            envFrom:
+            - configMapRef:
+                 name: application-configfile
+            # your command to run
+            command:
+            - /bin/sh
+            - -c
+            - echo 'hello world' && exit 0
+          restartPolicy: OnFailure
